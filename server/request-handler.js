@@ -15,7 +15,9 @@ this file and include it in basic-server.js so that it actually works.
 
 let data = {};
 data.results = [];
+let messageId = 1;
 module.exports.requestHandler = function(request, response) {
+  // console.log(request)
   // Request and Response come from node's http module.
   //
   // They include information about both the incoming request, such as
@@ -35,24 +37,40 @@ module.exports.requestHandler = function(request, response) {
   var statusCode = 200;
   var headers = defaultCorsHeaders;
   headers['Content-Type'] = 'text/plain';
-  console.log(request.url);
-  console.log(request.url.includes('/classes/messages'));
+
   if (request.url.includes('/classes/messages')) {
     if (request.method === 'GET') {
+      let dataCopy = data.results.slice().sort(function(a, b) {
+        return b['createdAt'] - a['createdAt'];
+      });
+      let dataObjCopy = {};
+      dataObjCopy['results'] = dataCopy;
+
       response.writeHead(statusCode, headers)
-      response.end(JSON.stringify(data)); 
+      response.end(JSON.stringify(dataObjCopy)); 
     } else if (request.method === 'POST') {
+    
       statusCode = 201;
       let body = '';
+
       request.on('data', (chunk) => {
         body += chunk.toString();
-      })
-      request.on('end', () => {
-        data.results.push(JSON.parse(body));
-        response.writeHead(statusCode, headers);
-        response.end(JSON.stringify(data.results));
       });
-    } 
+
+      request.on('end', () => {
+        let parsedBody = JSON.parse(body);
+        parsedBody['createdAt'] = new Date();
+        parsedBody['messageId'] = messageId;
+        messageId++;
+        data.results.push(parsedBody);
+        response.writeHead(statusCode, headers);
+        response.end();
+      });
+      
+    } else if (request.method === 'OPTIONS') {
+      response.writeHead(statusCode, headers)
+      response.end(JSON.stringify(data)); 
+    }
   } else {
     statusCode = 404;
     response.writeHead(statusCode,headers);
