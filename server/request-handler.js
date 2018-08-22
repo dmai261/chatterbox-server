@@ -59,17 +59,28 @@ module.exports.requestHandler = function(request, response) {
 
       request.on('end', () => {
         let parsedBody = JSON.parse(body);
-        parsedBody['createdAt'] = new Date();
-        parsedBody['messageId'] = messageId;
-        messageId++;
-        data.results.push(parsedBody);
-        response.writeHead(statusCode, headers);
-        response.end();
+        if (parsedBody.hasOwnProperty('username') && parsedBody.hasOwnProperty('text')) {
+          parsedBody['createdAt'] = new Date();
+          parsedBody['messageId'] = messageId;
+          messageId++;
+          data.results.push(parsedBody);
+          response.writeHead(statusCode, headers);
+          response.end();
+        } else {
+          statusCode = 400;
+          response.writeHead(statusCode, headers);
+          response.end();
+        }
       });
       
     } else if (request.method === 'OPTIONS') {
       response.writeHead(statusCode, headers)
       response.end(JSON.stringify(data)); 
+    } else if (request.method === 'DELETE') {
+      let deleteMessageId = request.url.replace(/[`${request.url}`]/, '');
+      response.end();
+    } else if (request.method === 'PUT') {
+    
     }
   } else {
     statusCode = 404;

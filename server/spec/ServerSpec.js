@@ -116,4 +116,39 @@ describe('Node Server Request Listener Function', function() {
       });
   });
 
+  it('Should 400 when POSTING with an incorrect username property', function() {
+    var stubMsg = {
+      usernamee: 'Jono',
+      text: 'Do my bidding!'
+    };
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+    handler.requestHandler(req, res);
+
+    // Wait for response to return and then check status code
+    waitForThen(
+      function() { return res._ended; },
+      function() {
+        expect(res._responseCode).to.equal(404);
+      });
+  });
+
+  it('Should 400 when POSTING with an incorrect text property', function() {
+    var stubMsg = {
+      username: 'Jono',
+      textt: 'Do my bidding!'
+    };
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    // Wait for response to return and then check status code
+    waitForThen(
+      function() { return res._ended; },
+      function() {
+        expect(res._responseCode).to.equal(404);
+    });
+  });
+
 });

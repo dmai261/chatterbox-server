@@ -94,12 +94,10 @@ describe('server', function() {
       json: {
         username: 'Jono',
         text: 'Do my bidding!',
-        // createdAt: new Date()
       }
     };  
     
     request(requestParams, function(error, response, body) {
-      // Now if we request the log, that message we posted should be there:
       request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
         var messages = JSON.parse(body).results;
         expect(messages[0].createdAt).to.exist;
@@ -108,6 +106,7 @@ describe('server', function() {
     });
   });
 
+
   //test3
   it('should have unique message ID numbers', function(done) {
     var requestParams = {method: 'POST',
@@ -115,18 +114,26 @@ describe('server', function() {
       json: {
         username: 'Jono',
         text: 'Do my bidding!',
-        // createdAt: new Date()
       }
     };  
     
     request(requestParams, function(error, response, body) {
-      // Now if we request the log, that message we posted should be there:
       request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
         var messages = JSON.parse(body).results;
-        expect(messages[0].createdAt).to.exist;
+        var filteredMessages = messages.filter(function(message) {return message['messageId'] === 1});
+        expect(filteredMessages.length).to.equal(1);
         done();
       });
     });
   });
   
+  it('should delete', function(done) {
+    var requestParams = {method: 'DELETE',
+      uri: 'http://127.0.0.1:3000/classes/messages/2'
+    };  
+    request(requestParams, function(error, response, body) {
+      expect(1).to.equal(1);
+      done();
+    });
+  });  
 });
